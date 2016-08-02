@@ -10,6 +10,8 @@ import com.github.tomakehurst.wiremock.standalone.CommandLineOptions;
 import com.github.tomakehurst.wiremock.standalone.MappingsLoader;
 import com.github.tomakehurst.wiremock.stubbing.StubMapping;
 import com.github.tomakehurst.wiremock.stubbing.StubMappings;
+import com.stubs.cool_extensions.config.ConfigResolver;
+import com.stubs.cool_extensions.start.StartAction;
 import com.stubs.cool_extensions.transformer.AbstractTransformer;
 import com.stubs.cool_extensions.transformer.CoolExtensionsTransformer;
 import com.typesafe.config.ConfigFactory;
@@ -66,10 +68,10 @@ public class WireMockServerRunner {
         try {
 
             wireMockServer.start();
-            ;
             out.println(BANNER);
             out.println();
             out.println(options);
+            ConfigResolver.getResolver().getStartActions().forEach(StartAction::run);
         } catch (FatalStartupException e) {
             System.err.println(e.getMessage());
             System.exit(1);

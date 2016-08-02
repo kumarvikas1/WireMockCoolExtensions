@@ -2,6 +2,7 @@ package com.stubs.cool_extensions.config;
 
 import com.github.tomakehurst.wiremock.http.Request;
 import com.stubs.cool_extensions.response.AbstractResponseGenerator;
+import com.stubs.cool_extensions.start.StartAction;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 
@@ -15,7 +16,7 @@ import java.util.stream.Collectors;
 public class ConfigResolver {
     private static final ConfigResolver configResolver = new ConfigResolver();
     private static final String BUILD_CONF = "conf/response";
-    private static final Config CONFIG = ConfigFactory.load(BUILD_CONF);
+    private static final Config CONFIG = ConfigFactory.load(BUILD_CONF).withFallback(ConfigFactory.load("conf/defaults"));
 
     private ConfigResolver() {
 
@@ -43,4 +44,17 @@ public class ConfigResolver {
     public Optional<? extends AbstractResponseGenerator> getResponse(Request request) {
         return getResponseGenerator().stream().filter(f -> f.applies(request)).findFirst();
     }
+
+
+    public List<? extends StartAction> getStartActions() {
+        return CONFIG.getStringList("start_actions").stream().map(f -> {
+            try {
+                return (StartAction) Class.forName(f).newInstance();
+            } catch (Exception e) {
+                throw new IllegalStateException("Class can't be instantiated");
+            }
+        }).collect(Collectors.toList());
+    }
+
+
 }
