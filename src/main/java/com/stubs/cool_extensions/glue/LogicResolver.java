@@ -39,14 +39,27 @@ public class LogicResolver implements AbstractLogicResolver {
                 updateBody(Body, match.group(5), "if");
     }
 
-    @Logic(exp = "(.*)key ([^\"]*)\\$}(.*)")
+    @Logic(exp = "key#key (.*?)#key")
     public String key(String exp) {
         Matcher match = Pattern.compile(exp).matcher(Body);
-        match.find();
-        return request.getBodyAsString().startsWith("<") ? updateBody(Body, getXMLValue(match.group(2)), "key")
-                :
-                updateBody(Body, request.queryParameter(match.group(2)).values().get(0), "key");
+        String retval = Body;
+        while (match.find()) {
+            String orig = match.group();
+            String value = match.group(1);
+            if (request.getBodyAsString().startsWith("<")) {
+                retval = updateBody1(retval, getXMLValue(value), orig);
+            } else {
+                retval = updateBody1(retval, request.queryParameter(value).values().get(0), orig);
+            }
+        }
+        return retval;
     }
+
+
+    private String updateBody1(String body, String value, String replaceText) {
+        return body.replaceAll(replaceText, value);
+    }
+
 
     private String getXMLValue(String value) {
         try {
@@ -62,6 +75,7 @@ public class LogicResolver implements AbstractLogicResolver {
             return "";
         }
     }
+    
 
     @Logic(exp = "(.*)given ([^\"]*) equals ([^\"]*) then show(.*)\\$}")
     public String show_only_when(String exp) {

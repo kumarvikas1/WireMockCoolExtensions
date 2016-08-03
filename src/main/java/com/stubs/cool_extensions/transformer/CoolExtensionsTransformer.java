@@ -42,7 +42,7 @@ public class CoolExtensionsTransformer extends AbstractTransformer {
     private ResponseDefinition filterBody() {
         getBody();
         ResponseDefinition retval = responseDefinition;
-        if (Optional.ofNullable(Body).isPresent() && Body.contains("${")) {
+        if (Optional.ofNullable(Body).isPresent() && (Body.contains("${") || Body.contains("#"))) {
             List<Method> methods = Arrays.asList(LogicResolver.class.getMethods());
             Arrays.asList(LogicResolver.class.getMethods()).stream().filter(getMatchingMethod(Body))
                     .forEach(method -> setBody(Body, method, retval));
