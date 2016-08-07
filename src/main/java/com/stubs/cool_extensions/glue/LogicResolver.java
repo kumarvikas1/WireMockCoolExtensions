@@ -1,15 +1,15 @@
 package com.stubs.cool_extensions.glue;
 
 import com.github.tomakehurst.wiremock.http.Request;
-import com.google.common.base.Joiner;
-import com.google.common.base.Splitter;
+import com.jayway.jsonpath.Configuration;
+import com.jayway.jsonpath.JsonPath;
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.XML;
 
 import javax.script.Invocable;
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
-import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -29,14 +29,15 @@ public class LogicResolver implements AbstractLogicResolver {
     }
 
 
-    @Logic(exp = "(.*)given ([^\"]*) equals ([^\"]*) then ([^\"]*) else ([^\"]*)\\$}(.*)")
+    @Logic(exp = "if#given ([^\"]*) equals ([^\"]*) then ([^\"]*) else ([^\"]*)#if")
     public String given_then_else(String exp) {
         Matcher match = Pattern.compile(exp).matcher(Body);
         match.find();
+        String orig = match.group();
 
-        return request.queryParameter(match.group(2)).values().get(0).equals(match.group(3)) ?
-                updateBody(Body, match.group(4), "if") :
-                updateBody(Body, match.group(5), "if");
+        return request.queryParameter(match.group(1)).values().get(0).equals(match.group(2)) ?
+                updateBody(Body, match.group(3), orig) :
+                updateBody(Body, match.group(4), orig);
     }
 
     @Logic(exp = "key#key (.*?)#key")
@@ -47,56 +48,61 @@ public class LogicResolver implements AbstractLogicResolver {
             String orig = match.group();
             String value = match.group(1);
             if (request.getBodyAsString().startsWith("<")) {
-                retval = updateBody1(retval, getXMLValue(value), orig);
+                retval = updateBody(retval, getXMLValue(value), orig);
             } else {
-                retval = updateBody1(retval, request.queryParameter(value).values().get(0), orig);
+                retval = updateBody(retval, request.queryParameter(value).values().get(0), orig);
+            }
+        }
+        return retval;
+    }
+
+    @Logic(exp = "show#given ([^\"]*) equals ([^\"]*) then show(.*?)#show")
+    public String show_only_when(String exp) {
+        Matcher match = Pattern.compile(exp, Pattern.DOTALL).matcher(Body);
+        String retval = Body;
+        while (match.find()) {
+            String orig = match.group();
+            String value = match.group(1);
+            if (request.getBodyAsString().startsWith("<")) {
+                retval = getXMLValue(value).equals(match.group(2)) ?
+                        updateBody(retval, match.group(3), orig) :
+                        updateBody(retval, "", orig);
+            } else {
+                retval = request.queryParameter(value).values().get(0).equals(match.group(2)) ?
+                        updateBody(retval, match.group(3), orig) :
+                        updateBody(retval, "", orig);
             }
         }
         return retval;
     }
 
 
-    private String updateBody1(String body, String value, String replaceText) {
-        return body.replaceAll(replaceText, value);
+    private String updateBody(String body, String value, String replaceText) {
+        return body.replaceAll(Pattern.quote(replaceText), Matcher.quoteReplacement(value));
     }
 
 
     private String getXMLValue(String value) {
+        String retval = "";
         try {
             JSONObject xmlJSONObj = XML.toJSONObject(request.getBodyAsString());
-            List<String> test = Splitter.on(".").splitToList(value);
-            Object ob = xmlJSONObj;
-            for (String s : test) {
-                ob = ((JSONObject) ob).get(s);
-            }
-            return ob.toString();
-        } catch (Exception e) {
+            Object document = Configuration.defaultConfiguration().jsonProvider().parse(xmlJSONObj.toString());
+            retval = JsonPath.read(document, value).toString();
+        } catch (JSONException e) {
             e.printStackTrace();
-            return "";
         }
-    }
-    
-
-    @Logic(exp = "(.*)given ([^\"]*) equals ([^\"]*) then show(.*)\\$}")
-    public String show_only_when(String exp) {
-        Matcher match = Pattern.compile(exp, Pattern.DOTALL).matcher(Body);
-        match.find();
-        return request.queryParameter(match.group(2)).values().get(0).equals(match.group(3)) ?
-                updateBody(Body, match.group(4), "show") :
-                updateBody(Body, "", "show");
+        return retval;
     }
 
-    @Logic(exp = "(.*)<script>\\$\\{(.*)\\$\\}<script>")
+
+    @Logic(exp = "#script(.*)#script")
     public String java_script(String exp) {
         Matcher match = Pattern.compile(exp).matcher(Body);
         match.find();
-        return updateBody(Body, executeScript(match.group(2)), "<script>");
+        String orig = match.group();
+        return updateBody(Body, executeScript(match.group(1)), orig);
     }
 
-
-    private String updateBody(String test, String replace, String text) {
-        return Pattern.compile(Joiner.on("").join(text, "\\$(.*)\\$\\}", text), Pattern.DOTALL).matcher(test).replaceAll(replace);
-    }
 
     private String executeScript(String script) {
         ScriptEngineManager scriptEngineManager = new ScriptEngineManager();

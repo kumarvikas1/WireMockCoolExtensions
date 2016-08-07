@@ -10,6 +10,7 @@ import com.stubs.cool_extensions.response.AbstractResponseGenerator;
 
 import java.lang.reflect.Method;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Predicate;
@@ -42,12 +43,17 @@ public class CoolExtensionsTransformer extends AbstractTransformer {
     private ResponseDefinition filterBody() {
         getBody();
         ResponseDefinition retval = responseDefinition;
-        if (Optional.ofNullable(Body).isPresent() && (Body.contains("${") || Body.contains("#"))) {
+        if (Optional.ofNullable(Body).isPresent() && Body.contains("#")) {
             List<Method> methods = Arrays.asList(LogicResolver.class.getMethods());
             Arrays.asList(LogicResolver.class.getMethods()).stream().filter(getMatchingMethod(Body))
+                    .sorted(getSortedAnnonation().reversed())
                     .forEach(method -> setBody(Body, method, retval));
         }
         return retval;
+    }
+
+    private Comparator<Method> getSortedAnnonation() {
+        return Comparator.comparingInt(f -> f.getAnnotation(Logic.class).exp().length());
     }
 
     private void setBody(String body, Method method, ResponseDefinition retval) {
