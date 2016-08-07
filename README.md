@@ -152,3 +152,28 @@ will result in
         
     },
 ```
+
+###Java Script
+
+Body
+```
+       "body": "Country is with Currency #scriptload(\"src/main/resources/mappingsResponse/js/foo.js\");#script"
+```
+
+Script
+```
+var value = function (object) {
+    var MyJavaClass = Java.type('com.stubs.cool_extensions.glue.JavaScriptHelper');
+    return MyJavaClass.getJSONValue(object, 'Currency');
+}
+```
+
+Get request 
+```
+test3/?Currency=USD
+```
+
+will result in
+```
+Country is with Currency USD
+```
