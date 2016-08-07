@@ -32,12 +32,21 @@ public class LogicResolver implements AbstractLogicResolver {
     @Logic(exp = "if#given ([^\"]*) equals ([^\"]*) then ([^\"]*) else ([^\"]*)#if")
     public String given_then_else(String exp) {
         Matcher match = Pattern.compile(exp).matcher(Body);
-        match.find();
-        String orig = match.group();
-
-        return request.queryParameter(match.group(1)).values().get(0).equals(match.group(2)) ?
-                updateBody(Body, match.group(3), orig) :
-                updateBody(Body, match.group(4), orig);
+        String retval = Body;
+        while (match.find()) {
+            String orig = match.group();
+            String value = match.group(1);
+            if (request.getBodyAsString().startsWith("<")) {
+                retval = getXMLValue(value).equals(match.group(2)) ?
+                        updateBody(retval, match.group(3), orig) :
+                        updateBody(retval, match.group(4), orig);
+            } else {
+                retval = request.queryParameter(match.group(1)).values().get(0).equals(match.group(2)) ?
+                        updateBody(retval, match.group(3), orig) :
+                        updateBody(retval, match.group(4), orig);
+            }
+        }
+        return retval;
     }
 
     @Logic(exp = "key#key (.*?)#key")
@@ -75,7 +84,7 @@ public class LogicResolver implements AbstractLogicResolver {
         }
         return retval;
     }
-
+    
 
     private String updateBody(String body, String value, String replaceText) {
         return body.replaceAll(Pattern.quote(replaceText), Matcher.quoteReplacement(value));
