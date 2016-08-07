@@ -63,5 +63,92 @@ will result in
 Currency is USD
 ```
 
+###Show If
 
+```
+ {
+  "data": [
+    {
+      "id": "X999_Y999",
+      "from": {
+        "name": if#given Country equals America then USD else NA#if, "id": "X12"
+      },
+      "message": "Looking forward to 2010!",
+      "actions": [
+        {
+          "name": "Country is key#key Country#key",
+          "link": "http://www.facebook.com/X999/posts/Y999"
+        },
+        show#given Country equals America then show
 
+          "name": "Like and if#given Country equals America then USD else NA#if And Country is key#key Country#key",
+          "link": "http://www.facebook.com/X999/posts/Y999"
+        }
+        #show
+      ],
+        show#given Country equals America then show
+      "type": "status",
+      "created_time": "2010-08-02T21:27:44+0000",
+      "updated_time": "2010-08-02T21:27:44+0000"
+        #show
+    },
+```
+Get request 
+```
+test3/?Country=America
+```
+
+will result in
+```
+{
+  "data": [
+    {
+      "id": "X999_Y999",
+      "from": {
+        "name": USD, "id": "X12"
+      },
+      "message": "Looking forward to 2010!",
+      "actions": [
+        {
+          "name": "Country is America",
+          "link": "http://www.facebook.com/X999/posts/Y999"
+        },
+        
+
+          "name": "Like and USD And Country is America",
+          "link": "http://www.facebook.com/X999/posts/Y999"
+        }
+        
+      ],
+        
+      "type": "status",
+      "created_time": "2010-08-02T21:27:44+0000",
+      "updated_time": "2010-08-02T21:27:44+0000"
+        
+    },
+```
+
+And Get request 
+```
+test3/?Country=India
+```
+will result in
+```
+{
+  "data": [
+    {
+      "id": "X999_Y999",
+      "from": {
+        "name": NA, "id": "X12"
+      },
+      "message": "Looking forward to 2010!",
+      "actions": [
+        {
+          "name": "Country is India",
+          "link": "http://www.facebook.com/X999/posts/Y999"
+        },
+        
+      ],
+        
+    },
+```
