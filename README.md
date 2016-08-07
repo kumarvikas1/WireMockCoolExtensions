@@ -1,2 +1,3 @@
-WireMockCool Extensions is an extension to wiremock to allow to play with JsonPath and update the body runtime with Or 
-without extending WireMock Transformers
+WireMockCool Extensions allows condition, javascript and java pojos to manipulate the body of the response.
+
+It obviously written om top of wiremock http://wiremock.org/
