@@ -45,7 +45,22 @@ test3/?Country=America&Currency=USD
 
 will result in
 ```
-ountry is America And currency is USD
+Country is America And currency is USD
+```
+
+###If Else
+
+```
+    "body": "Currency is if#given Country equals America then USD else NA#if",
+```
+Get request 
+```
+test3/?Country=America
+```
+
+will result in
+```
+Currency is USD
 ```
 
 
