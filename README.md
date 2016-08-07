@@ -36,7 +36,7 @@ response = [
 
 ####Key
 ```
-    "body": "Country is key#key Country#key And currency is key#key Currency#key",
+"body": "Country is key#key Country#key And currency is key#key Currency#key",
 ```
 Get request 
 ```
@@ -51,7 +51,7 @@ Country is America And currency is USD
 ###If Else
 
 ```
-    "body": "Currency is if#given Country equals America then USD else NA#if",
+"body": "Currency is if#given Country equals America then USD else NA#if",
 ```
 Get request 
 ```
@@ -65,6 +65,7 @@ Currency is USD
 
 ###Show If
 
+Body
 ```
  {
   "data": [
@@ -157,7 +158,7 @@ will result in
 
 Body
 ```
-       "body": "Country is with Currency #scriptload(\"src/main/resources/mappingsResponse/js/foo.js\");#script"
+"body": "Country is with Currency #scriptload(\"src/main/resources/mappingsResponse/js/foo.js\");#script"
 ```
 
 Script
