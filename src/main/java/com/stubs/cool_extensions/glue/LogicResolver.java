@@ -28,6 +28,9 @@ public class LogicResolver implements AbstractLogicResolver {
         this.request = request;
     }
 
+    public void setBody(String body) {
+        this.Body = body;
+    }
 
     @Logic(exp = "if#given ([^\"]*) equals ([^\"]*) then ([^\"]*) else ([^\"]*)#if")
     public String given_then_else(String exp) {
@@ -84,7 +87,7 @@ public class LogicResolver implements AbstractLogicResolver {
         }
         return retval;
     }
-    
+
 
     private String updateBody(String body, String value, String replaceText) {
         return body.replaceAll(Pattern.quote(replaceText), Matcher.quoteReplacement(value));
