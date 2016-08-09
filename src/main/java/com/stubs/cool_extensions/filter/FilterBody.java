@@ -51,8 +51,10 @@ public class FilterBody {
         String value = body.startsWith("<") ? JavaScriptHelper.getXMLValue(request, globalMappings.getPath()) :
                 JavaScriptHelper.getJSONValue(request, globalMappings.getPath());
         Matcher matcher = Pattern.compile(globalMappings.getMatch()).matcher(body);
-        matcher.find();
-        body = body.replaceAll(matcher.group(), matcher.group().replaceAll(matcher.group(1), value));
+        while (matcher.find()) {
+            body = body.replaceAll(matcher.group(), matcher.group().
+                    replaceAll(matcher.group(Integer.valueOf(Optional.ofNullable(globalMappings.getReplaceIndex()).orElse("1"))), value));
+        }
     }
 
 

@@ -28,6 +28,8 @@ public class GlobalMappings {
     private String match;
     @JsonProperty("path")
     private String path;
+    @JsonProperty("replaceIndex")
+    private String replaceIndex;
     @JsonIgnore
     private Map<String, Object> additionalProperties = new HashMap<String, Object>();
 
@@ -79,4 +81,13 @@ public class GlobalMappings {
         this.path = path;
     }
 
+    @JsonProperty("replaceIndex")
+    public String getReplaceIndex() {
+        return replaceIndex;
+    }
+
+    @JsonProperty("replaceIndex")
+    public void setReplaceIndex(String replaceIndex) {
+        this.replaceIndex = replaceIndex;
+    }
 }
