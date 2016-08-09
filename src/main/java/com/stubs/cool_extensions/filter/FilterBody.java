@@ -8,8 +8,11 @@ import com.stubs.cool_extensions.config.ConfigResolver;
 import com.stubs.cool_extensions.glue.JavaScriptHelper;
 import com.stubs.cool_extensions.glue.Logic;
 import com.stubs.cool_extensions.glue.LogicResolver;
+import org.apache.commons.io.IOUtils;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
+import org.springframework.core.io.support.ResourcePatternResolver;
 
-import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.util.Arrays;
@@ -56,7 +59,7 @@ public class FilterBody {
     private ResponseDefinition filterBody() {
         ResponseDefinition retval = responseDefinition;
         applyGlobalMappings();
-        if (Optional.ofNullable(body).isPresent() && body.contains("#")) {
+        if (isBodyPresent() && body.contains("#")) {
             List<Method> methods = Arrays.asList(LogicResolver.class.getMethods());
             Arrays.asList(LogicResolver.class.getMethods()).stream().filter(getMatchingMethod())
                     .sorted(getSortedAnnonation().reversed())
@@ -65,16 +68,34 @@ public class FilterBody {
         return retval;
     }
 
+    private boolean isBodyPresent() {
+        return Optional.ofNullable(body).isPresent();
+    }
+
     private void applyGlobalMappings() {
         String path = ConfigResolver.getConfig().hasPath("globalMappings") ? ConfigResolver.getConfig().getString("globalMappings") : "";
-        if (!path.isEmpty())
+        if (isBodyPresent() && !path.isEmpty())
             try {
-                List<GlobalMappings> globalMappings = new ObjectMapper().readValue(new File(System.getProperty("user.dir") + path), Mappings.class).getGlobalMappings();
+                List<GlobalMappings> globalMappings = new ObjectMapper().readValue(getMappings(path), Mappings.class).getGlobalMappings();
                 globalMappings.stream().filter(f -> request.getUrl().matches(f.getUrl())).forEach(this::updateBodyGlobally);
                 logicResolver.setBody(body);
             } catch (IOException e) {
                 e.printStackTrace();
             }
+    }
+
+    private String getMappings(String path) {
+        ResourcePatternResolver resolver = new PathMatchingResourcePatternResolver(this.getClass().getClass().getClassLoader());
+        return getString(resolver.getResource("mappingsResponse/globalMappings.json"));
+    }
+
+    private String getString(Resource f) {
+        try {
+            return IOUtils.toString(f.getInputStream());
+        } catch (IOException e) {
+            e.printStackTrace();
+            throw new IllegalStateException("Conditions can't be parsed");
+        }
     }
 
     private Comparator<Method> getSortedAnnonation() {
