@@ -10,11 +10,14 @@ import com.github.tomakehurst.wiremock.standalone.CommandLineOptions;
 import com.github.tomakehurst.wiremock.standalone.MappingsLoader;
 import com.github.tomakehurst.wiremock.stubbing.StubMapping;
 import com.github.tomakehurst.wiremock.stubbing.StubMappings;
-import com.stubs.cool_extensions.config.ConfigResolver;
 import com.stubs.cool_extensions.start.StartAction;
+import com.stubs.cool_extensions.start.StartActonExecutor;
 import com.stubs.cool_extensions.transformer.AbstractTransformer;
 import com.stubs.cool_extensions.transformer.CoolExtensionsTransformer;
-import com.typesafe.config.ConfigFactory;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
+
+import java.util.List;
 
 import static com.github.tomakehurst.wiremock.WireMockServer.FILES_ROOT;
 import static com.github.tomakehurst.wiremock.WireMockServer.MAPPINGS_ROOT;
@@ -41,8 +44,8 @@ public class WireMockServerRunner {
     private WireMockServer wireMockServer;
 
     public void run(String... args) {
+        ApplicationContext ctx = new ClassPathXmlApplicationContext(new String[]{"spring-context.xml"});
         CommandLineOptions options = new CommandLineOptions(args);
-        System.out.println(options.portNumber());
         if (options.help()) {
             out.println(options.helpText());
             return;
@@ -56,7 +59,7 @@ public class WireMockServerRunner {
         mappingsFileSource.createIfNecessary();
         WireMockConfiguration options1 = wireMockConfig()
                 .port(8980)
-                .extensions(getTransformer()).
+                .extensions(getTransformer(ctx)).
                         usingFilesUnderClasspath("mappingsResponse");
         wireMockServer = new WireMockServer(options1);
         wireMockServer.enableRecordMappings(mappingsFileSource, filesFileSource);
@@ -71,7 +74,7 @@ public class WireMockServerRunner {
             out.println(BANNER);
             out.println();
             out.println(options);
-            ConfigResolver.getResolver().getStartActions().forEach(StartAction::run);
+            getStartActions(ctx).forEach(StartAction::run);
         } catch (FatalStartupException e) {
             System.err.println(e.getMessage());
             System.exit(1);
@@ -93,17 +96,14 @@ public class WireMockServerRunner {
         });
     }
 
+    private List<StartAction> getStartActions(ApplicationContext applicationContext) {
+        return ((StartActonExecutor) (applicationContext.getBean("startActionsExecutor"))).getStartActions();
+    }
 
-    private <T extends AbstractTransformer> Class<T> getTransformer() {
-        Class retval = CoolExtensionsTransformer.class;
 
-        try {
-            retval = Class.forName(ConfigFactory.load(TRANSFORM_CONFIG)
-                    .withFallback(ConfigFactory.load("conf/defaults")).getString("wiremock.transformer")).newInstance().getClass();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return retval;
+    private AbstractTransformer getTransformer(ApplicationContext applicationContext) {
+        return (CoolExtensionsTransformer)
+                applicationContext.getBean("coolExtensionsTransformer");
     }
 
     public void stop() {

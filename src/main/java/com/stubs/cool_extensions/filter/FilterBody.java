@@ -1,10 +1,11 @@
 package com.stubs.cool_extensions.filter;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.tomakehurst.wiremock.common.FileSource;
 import com.github.tomakehurst.wiremock.http.Request;
 import com.github.tomakehurst.wiremock.http.ResponseDefinition;
-import com.stubs.cool_extensions.config.ConfigResolver;
 import com.stubs.cool_extensions.glue.JavaScriptHelper;
 import com.stubs.cool_extensions.glue.Logic;
 import com.stubs.cool_extensions.glue.LogicResolver;
@@ -75,10 +76,11 @@ public class FilterBody {
     }
 
     private void applyGlobalMappings() {
-        String path = ConfigResolver.getConfig().hasPath("globalMappings") ? ConfigResolver.getConfig().getString("globalMappings") : "";
-        if (isBodyPresent() && !path.isEmpty())
+        if (isBodyPresent() && isGlobalMappingConfigExist())
             try {
-                List<GlobalMappings> globalMappings = new ObjectMapper().readValue(getMappings(path), Mappings.class).getGlobalMappings();
+                List<GlobalMappings> globalMappings = new ObjectMapper().setSerializationInclusion(JsonInclude.Include.NON_NULL).readerFor(new TypeReference<List<GlobalMappings>>() {
+                }).withRootName("global_mappings").readValue(getMappings());
+
                 globalMappings.stream().filter(f -> request.getUrl().matches(f.getUrl())).forEach(this::updateBodyGlobally);
                 logicResolver.setBody(body);
             } catch (IOException e) {
@@ -86,7 +88,11 @@ public class FilterBody {
             }
     }
 
-    private String getMappings(String path) {
+    private boolean isGlobalMappingConfigExist() {
+        return new PathMatchingResourcePatternResolver(this.getClass().getClass().getClassLoader()).getResource("mappingsResponse/globalMappings.json").exists();
+    }
+
+    private String getMappings() {
         ResourcePatternResolver resolver = new PathMatchingResourcePatternResolver(this.getClass().getClass().getClassLoader());
         return getString(resolver.getResource("mappingsResponse/globalMappings.json"));
     }
