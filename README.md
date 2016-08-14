@@ -178,3 +178,15 @@ will result in
 ```
 Country is with Currency USD
 ```
+
+###Create globalMappings.json to simply make a regular expression replaced in the body with the request body value
+
+```
+{
+  "global_mappings": [
+    {
+      "url": "(.*)test3/?Currency=USD",
+      "match": "\"Currency value is (.*)\"",
+      "path": "Currency"
+    },
+```
