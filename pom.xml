@@ -15,8 +15,8 @@
         <connection>scm:git:https://github.com/kumarvikas1/WireMockCoolExtensions.git</connection>
         <developerConnection>scm:git:https://github.com/kumarvikas1/WireMockCoolExtensions.git</developerConnection>
         <url>https://github.com/kumarvikas1/WireMockCoolExtensions.git</url>
-      <tag>wiremock_cool_extensions-1.0.0</tag>
-  </scm>
+        <tag>wiremock_cool_extensions-1.0.0</tag>
+    </scm>
 
     <distributionManagement>
         <snapshotRepository>
