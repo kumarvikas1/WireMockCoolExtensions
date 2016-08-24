@@ -2,6 +2,15 @@ WireMockCool Extensions allows condition, javascript and java pojos to manipulat
 
 It obviously written om top of wiremock http://wiremock.org/
 
+##Installation
+```
+<dependency>
+    <groupId>com.github.kumarvikas1</groupId>
+    <artifactId>wiremock_cool_extensions</artifactId>
+    <version>1.0.0</version>
+</dependency>
+```
+
 ##How It Works
 
 ###Extend Response Generator
