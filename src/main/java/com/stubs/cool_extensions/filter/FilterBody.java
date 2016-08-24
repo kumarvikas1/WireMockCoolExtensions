@@ -5,7 +5,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.tomakehurst.wiremock.common.FileSource;
 import com.github.tomakehurst.wiremock.http.Request;
-import com.github.tomakehurst.wiremock.http.ResponseDefinition;
+import com.github.tomakehurst.wiremock.http.Response;
 import com.stubs.cool_extensions.glue.JavaScriptHelper;
 import com.stubs.cool_extensions.glue.Logic;
 import com.stubs.cool_extensions.glue.LogicResolver;
@@ -29,21 +29,21 @@ import java.util.regex.Pattern;
  */
 public class FilterBody {
 
-    private ResponseDefinition responseDefinition;
+    private Response response;
     private Request request;
     private FileSource fileSource;
     private String body;
     private LogicResolver logicResolver;
 
     private FilterBody(Builder builder) {
-        this.responseDefinition = builder.responseDefinition;
+        this.response = builder.response;
         this.request = builder.request;
         this.fileSource = builder.fileSource;
         this.body = builder.body;
         this.logicResolver = builder.logicResolver;
     }
 
-    public ResponseDefinition getFilterBody() {
+    public Response getFilterBody() {
         return filterBody();
     }
 
@@ -59,16 +59,15 @@ public class FilterBody {
     }
 
 
-    private ResponseDefinition filterBody() {
-        ResponseDefinition retval = responseDefinition;
+    private Response filterBody() {
         applyGlobalMappings();
         if (isBodyPresent() && body.contains("#")) {
             List<Method> methods = Arrays.asList(LogicResolver.class.getMethods());
             Arrays.asList(LogicResolver.class.getMethods()).stream().filter(getMatchingMethod())
                     .sorted(getSortedAnnonation().reversed())
-                    .forEach(method -> setBody(method, retval));
+                    .forEach(method -> setBody(method));
         }
-        return retval;
+        return response;
     }
 
     private boolean isBodyPresent() {
@@ -81,11 +80,20 @@ public class FilterBody {
                 List<GlobalMappings> globalMappings = new ObjectMapper().setSerializationInclusion(JsonInclude.Include.NON_NULL).readerFor(new TypeReference<List<GlobalMappings>>() {
                 }).withRootName("global_mappings").readValue(getMappings());
 
-                globalMappings.stream().filter(f -> request.getUrl().matches(f.getUrl())).forEach(this::updateBodyGlobally);
+                globalMappings.stream().filter(filterMappings(request)).forEach(this::updateBodyGlobally);
                 logicResolver.setBody(body);
             } catch (IOException e) {
                 e.printStackTrace();
             }
+    }
+
+    private Predicate<GlobalMappings> filterMappings(Request request) {
+        return m -> isMatch(Optional.ofNullable(m.getUrl()).orElse(".*"), request.getUrl())
+                && isMatch(Optional.ofNullable(m.getBody()).orElse(".*"), request.getBodyAsString());
+    }
+
+    private boolean isMatch(String regex, String body) {
+        return Pattern.compile(regex, Pattern.DOTALL).matcher(body).find();
     }
 
     private boolean isGlobalMappingConfigExist() {
@@ -110,12 +118,13 @@ public class FilterBody {
         return Comparator.comparingInt(f -> f.getAnnotation(Logic.class).exp().length());
     }
 
-    private void setBody(Method method, ResponseDefinition retval) {
+    private void setBody(Method method) {
+        Response retval = response;
         try {
             String exp = method.getAnnotation(Logic.class).exp();
             body = (String) method.invoke(logicResolver, exp);
             logicResolver.setBody(body);
-            retval.setBody(body);
+            response = retval.response().body(body).headers(response.getHeaders()).statusMessage(response.getStatusMessage()).build();
         } catch (Exception w) {
             w.printStackTrace();
         }
@@ -134,14 +143,14 @@ public class FilterBody {
 
 
     public static class Builder {
-        private ResponseDefinition responseDefinition;
+        private Response response;
         private Request request;
         private FileSource fileSource;
         private String body;
         private LogicResolver logicResolver;
 
-        public Builder ResponseDefination(ResponseDefinition responseDefinition) {
-            this.responseDefinition = responseDefinition;
+        public Builder Response(Response response) {
+            this.response = response;
             return this;
         }
 

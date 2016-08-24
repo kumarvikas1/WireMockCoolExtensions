@@ -7,23 +7,17 @@ package com.stubs.cool_extensions.filter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
-import javax.annotation.Generated;
 import java.util.HashMap;
 import java.util.Map;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
-@Generated("org.jsonschema2pojo")
-@JsonPropertyOrder({
-        "url",
-        "match",
-        "path"
-})
 public class GlobalMappings {
 
     @JsonProperty("url")
     private String url;
+    @JsonProperty("body")
+    private String body;
     @JsonProperty("match")
     private String match;
     @JsonProperty("path")
@@ -47,6 +41,22 @@ public class GlobalMappings {
     @JsonProperty("url")
     public void setUrl(String url) {
         this.url = url;
+    }
+
+    /**
+     * @return The body
+     */
+    @JsonProperty("body")
+    public String getBody() {
+        return body;
+    }
+
+    /**
+     * @param body The body
+     */
+    @JsonProperty("body")
+    public void setBody(String body) {
+        this.body = body;
     }
 
     /**
@@ -90,4 +100,6 @@ public class GlobalMappings {
     public void setReplaceIndex(String replaceIndex) {
         this.replaceIndex = replaceIndex;
     }
+
+    
 }

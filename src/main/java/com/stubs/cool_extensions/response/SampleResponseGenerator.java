@@ -1,7 +1,7 @@
 package com.stubs.cool_extensions.response;
 
 import com.github.tomakehurst.wiremock.http.Request;
-import com.github.tomakehurst.wiremock.http.ResponseDefinition;
+import com.github.tomakehurst.wiremock.http.Response;
 import org.springframework.stereotype.Component;
 
 /**
@@ -11,7 +11,7 @@ import org.springframework.stereotype.Component;
 public class SampleResponseGenerator extends AbstractResponseGenerator {
 
     @Override
-    public ResponseDefinition getResponse() {
+    public Response getResponse() {
         throw new IllegalStateException("Should never be executed");
     }
 

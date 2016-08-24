@@ -1,6 +1,7 @@
 package com.stubs.cool_extensions.response;
 
 import com.github.tomakehurst.wiremock.http.Request;
+import com.github.tomakehurst.wiremock.http.Response;
 import com.github.tomakehurst.wiremock.http.ResponseDefinition;
 import org.springframework.stereotype.Component;
 
@@ -12,5 +13,5 @@ public abstract class AbstractResponseGenerator extends ResponseDefinition {
 
     public abstract boolean applies(Request request);
 
-    public abstract ResponseDefinition getResponse();
+    public abstract Response getResponse();
 }

@@ -5,6 +5,7 @@ import com.github.tomakehurst.wiremock.common.FatalStartupException;
 import com.github.tomakehurst.wiremock.common.FileSource;
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration;
 import com.github.tomakehurst.wiremock.http.ResponseDefinition;
+import com.github.tomakehurst.wiremock.matching.RequestMatcherExtension;
 import com.github.tomakehurst.wiremock.matching.RequestPattern;
 import com.github.tomakehurst.wiremock.standalone.CommandLineOptions;
 import com.github.tomakehurst.wiremock.standalone.MappingsLoader;
@@ -22,7 +23,6 @@ import java.util.List;
 import static com.github.tomakehurst.wiremock.WireMockServer.FILES_ROOT;
 import static com.github.tomakehurst.wiremock.WireMockServer.MAPPINGS_ROOT;
 import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig;
-import static com.github.tomakehurst.wiremock.http.RequestMethod.ANY;
 import static java.lang.System.out;
 
 public class WireMockServerRunner {
@@ -59,7 +59,7 @@ public class WireMockServerRunner {
         mappingsFileSource.createIfNecessary();
         WireMockConfiguration options1 = wireMockConfig()
                 .port(8980)
-                .extensions(getTransformer(ctx)).
+                .extensions(getTransformer(ctx), getRequestMatcher(ctx)).
                         usingFilesUnderClasspath("mappingsResponse");
         wireMockServer = new WireMockServer(options1);
         wireMockServer.enableRecordMappings(mappingsFileSource, filesFileSource);
@@ -84,10 +84,8 @@ public class WireMockServerRunner {
     private void addProxyMapping(final String baseUrl) {
         wireMockServer.loadMappingsUsing(new MappingsLoader() {
             public void loadMappingsInto(StubMappings stubMappings) {
-                RequestPattern requestPattern = new RequestPattern(ANY);
-                requestPattern.setUrlPattern(".*");
+                RequestPattern requestPattern = RequestPattern.everything();
                 ResponseDefinition responseDef = new ResponseDefinition();
-                responseDef.setProxyBaseUrl(baseUrl);
 
                 StubMapping proxyBasedMapping = new StubMapping(requestPattern, responseDef);
                 proxyBasedMapping.setPriority(10); // Make it low priority so that existing stubs will take precedence
@@ -104,6 +102,11 @@ public class WireMockServerRunner {
     private AbstractTransformer getTransformer(ApplicationContext applicationContext) {
         return (CoolExtensionsTransformer)
                 applicationContext.getBean("coolExtensionsTransformer");
+    }
+
+    private RequestMatcherExtension getRequestMatcher(ApplicationContext applicationContext) {
+        return (RequestMatcherExtension)
+                applicationContext.getBean("requestMatcher");
     }
 
     public void stop() {
