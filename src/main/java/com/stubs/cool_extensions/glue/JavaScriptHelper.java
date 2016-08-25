@@ -12,6 +12,8 @@ import org.json.XML;
  */
 public class JavaScriptHelper {
 
+    public static final String NS_D = "-?ns\\d+:";
+
     public static String getJSONValue(Object object, String value) {
         return ((Request) object).queryParameter(value).values().get(0);
     }
@@ -24,7 +26,7 @@ public class JavaScriptHelper {
         String retval = "";
         try {
             JSONObject xmlJSONObj = XML.toJSONObject(request.getBodyAsString());
-            Object document = Configuration.defaultConfiguration().jsonProvider().parse(xmlJSONObj.toString());
+            Object document = Configuration.defaultConfiguration().jsonProvider().parse(xmlJSONObj.toString().replaceAll(NS_D, ""));
             retval = JsonPath.read(document, value).toString();
         } catch (JSONException e) {
             e.printStackTrace();

@@ -13,8 +13,10 @@ import com.github.tomakehurst.wiremock.stubbing.StubMapping;
 import com.github.tomakehurst.wiremock.stubbing.StubMappings;
 import com.stubs.cool_extensions.start.StartAction;
 import com.stubs.cool_extensions.start.StartActonExecutor;
+import com.stubs.cool_extensions.transformer.AbstractExtensionsTransformer;
 import com.stubs.cool_extensions.transformer.AbstractTransformer;
 import com.stubs.cool_extensions.transformer.CoolExtensionsTransformer;
+import com.stubs.cool_extensions.transformer.CoolTransformer;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
@@ -50,7 +52,6 @@ public class WireMockServerRunner {
             out.println(options.helpText());
             return;
         }
-
         FileSource fileSource = options.filesRoot();
         fileSource.createIfNecessary();
         FileSource filesFileSource = fileSource.child(FILES_ROOT);
@@ -59,11 +60,10 @@ public class WireMockServerRunner {
         mappingsFileSource.createIfNecessary();
         WireMockConfiguration options1 = wireMockConfig()
                 .port(8980)
-                .extensions(getTransformer(ctx), getRequestMatcher(ctx)).
+                .extensions(getTransformer(ctx), getRequestMatcher(ctx), getExtensionTransformer(ctx)).
                         usingFilesUnderClasspath("mappingsResponse");
         wireMockServer = new WireMockServer(options1);
         wireMockServer.enableRecordMappings(mappingsFileSource, filesFileSource);
-
         if (options.specifiesProxyUrl()) {
             addProxyMapping(options.proxyUrl());
         }
@@ -73,7 +73,7 @@ public class WireMockServerRunner {
             wireMockServer.start();
             out.println(BANNER);
             out.println();
-            out.println(options);
+            out.println("Port Number :8980");
             getStartActions(ctx).forEach(StartAction::run);
         } catch (FatalStartupException e) {
             System.err.println(e.getMessage());
@@ -100,14 +100,20 @@ public class WireMockServerRunner {
 
 
     private AbstractTransformer getTransformer(ApplicationContext applicationContext) {
-        return (CoolExtensionsTransformer)
-                applicationContext.getBean("coolExtensionsTransformer");
+        return (CoolTransformer)
+                applicationContext.getBean("coolTransformer");
     }
 
     private RequestMatcherExtension getRequestMatcher(ApplicationContext applicationContext) {
         return (RequestMatcherExtension)
                 applicationContext.getBean("requestMatcher");
     }
+
+    private AbstractExtensionsTransformer getExtensionTransformer(ApplicationContext applicationContext) {
+        return (CoolExtensionsTransformer)
+                applicationContext.getBean("coolExtensionsTransformer");
+    }
+
 
     public void stop() {
         wireMockServer.stop();

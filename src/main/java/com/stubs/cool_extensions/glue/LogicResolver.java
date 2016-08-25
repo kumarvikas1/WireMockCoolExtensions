@@ -1,11 +1,6 @@
 package com.stubs.cool_extensions.glue;
 
 import com.github.tomakehurst.wiremock.http.Request;
-import com.jayway.jsonpath.Configuration;
-import com.jayway.jsonpath.JsonPath;
-import org.json.JSONException;
-import org.json.JSONObject;
-import org.json.XML;
 
 import javax.script.Invocable;
 import javax.script.ScriptEngine;
@@ -95,15 +90,7 @@ public class LogicResolver implements AbstractLogicResolver {
 
 
     private String getXMLValue(String value) {
-        String retval = "";
-        try {
-            JSONObject xmlJSONObj = XML.toJSONObject(request.getBodyAsString());
-            Object document = Configuration.defaultConfiguration().jsonProvider().parse(xmlJSONObj.toString());
-            retval = JsonPath.read(document, value).toString();
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-        return retval;
+        return JavaScriptHelper.getXMLValue(request, value);
     }
 
 
