@@ -17,6 +17,7 @@ It obviously written om top of wiremock http://wiremock.org/
 Response Generator needs to overriden if we want to update Java Code and applies method return boolean to return applicable response generator
 
 ```
+@Component
 public class Test1Generator extends AbstractResponseGenerator {
 
 @Override
@@ -33,14 +34,6 @@ Implement the getResponse method to return the updated Body.
     public ResponseDefinition getResponse() {
 ```
 
-Update the defaults.conf with the name of class extending Abstract Response Generator
-```
-response = [
-  "com.hotels.rtt.generators.Test1Generator",
-  "com.hotels.rtt.generators.Test2Generator",
-  "com.hotels.rtt.generators.Test5Generator"
-]
-```
 ###Update Body in .json files
 
 ####Key
