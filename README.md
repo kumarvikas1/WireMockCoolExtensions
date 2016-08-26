@@ -36,7 +36,7 @@ Implement the getResponse method to return the updated Body.
 
 ###Update Body in .json files
 
-####Key
+###Key
 ```
 "body": "Country is key#key Country#key And currency is key#key Currency#key",
 ```
@@ -181,7 +181,7 @@ will result in
 Country is with Currency USD
 ```
 
-####FreeMaker
+###FreeMaker
 ```
 {
   "Currency": ${request.Currency}
