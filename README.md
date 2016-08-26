@@ -7,7 +7,7 @@ It obviously written om top of wiremock http://wiremock.org/
 <dependency>
     <groupId>com.github.kumarvikas1</groupId>
     <artifactId>wiremock_cool_extensions</artifactId>
-    <version>1.0.0</version>
+    <version>1.0.0.1</version>
 </dependency>
 ```
 
@@ -180,6 +180,26 @@ will result in
 ```
 Country is with Currency USD
 ```
+
+####FreeMaker
+```
+{
+  "Currency": ${request.Currency}
+}
+
+```
+Get request 
+```
+test3/?Country=America&Currency=USD
+```
+
+will result in
+```
+{
+  "Currency": GBP
+}
+```
+
 
 ###Create globalMappings.json to simply make a regular expression replaced in the body with the request body value
 
