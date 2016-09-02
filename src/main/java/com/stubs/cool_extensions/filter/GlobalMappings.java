@@ -4,12 +4,8 @@ package com.stubs.cool_extensions.filter;
  * Created by vikakumar on 8/8/16.
  */
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
-
-import java.util.HashMap;
-import java.util.Map;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class GlobalMappings {
@@ -22,10 +18,16 @@ public class GlobalMappings {
     private String match;
     @JsonProperty("path")
     private String path;
+    @JsonProperty("inject")
+    private String inject;
     @JsonProperty("replaceIndex")
     private String replaceIndex;
-    @JsonIgnore
-    private Map<String, Object> additionalProperties = new HashMap<String, Object>();
+    @JsonProperty("injectIndex")
+    private String injectIndex;
+    @JsonProperty("injectReplaceIndex")
+    private String injectReplaceIndex;
+    @JsonProperty("injectMatch")
+    private String injectMatch;
 
     /**
      * @return The url
@@ -91,6 +93,22 @@ public class GlobalMappings {
         this.path = path;
     }
 
+    /**
+     * @return The inject
+     */
+    @JsonProperty("inject")
+    public String getInject() {
+        return inject;
+    }
+
+    /**
+     * @param inject The inject
+     */
+    @JsonProperty("inject")
+    public void setInject(String inject) {
+        this.inject = inject;
+    }
+
     @JsonProperty("replaceIndex")
     public String getReplaceIndex() {
         return replaceIndex;
@@ -101,5 +119,35 @@ public class GlobalMappings {
         this.replaceIndex = replaceIndex;
     }
 
-    
+    @JsonProperty("injectIndex")
+    public String getInjectIndex() {
+        return injectIndex;
+    }
+
+    @JsonProperty("injectIndex")
+    public void setInjectIndex(String injectIndex) {
+        this.injectIndex = injectIndex;
+    }
+
+    @JsonProperty("injectReplaceIndex")
+    public String getInjectReplaceIndex() {
+        return injectReplaceIndex;
+    }
+
+    @JsonProperty("injectReplaceIndex")
+    public void setInjectReplaceIndex(String injectReplaceIndex) {
+        this.injectReplaceIndex = injectReplaceIndex;
+    }
+
+    @JsonProperty("injectMatch")
+    public String getInjectMatch() {
+        return injectMatch;
+    }
+
+    @JsonProperty("injectMatch")
+    public void setInjectMatch(String injectMatch) {
+        this.injectMatch = injectMatch;
+    }
+
+
 }

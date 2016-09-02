@@ -49,13 +49,40 @@ public class FilterBody {
 
 
     private void updateBodyGlobally(GlobalMappings globalMappings) {
-        String value = body.startsWith("<") ? JavaScriptHelper.getXMLValue(request, globalMappings.getPath()) :
-                JavaScriptHelper.getJSONValue(request, globalMappings.getPath());
+        String value = Optional.ofNullable(globalMappings.getPath()).isPresent() ? getPathValue(globalMappings) : getBodyValue(globalMappings);
         Matcher matcher = Pattern.compile(globalMappings.getMatch()).matcher(body);
         while (matcher.find()) {
             body = body.replaceAll(matcher.group(), matcher.group().
                     replaceAll(matcher.group(Integer.valueOf(Optional.ofNullable(globalMappings.getReplaceIndex()).orElse("1"))), value));
         }
+    }
+
+    private String getBodyValue(GlobalMappings globalMappings) {
+        String retval = "";
+        Matcher matcher = Pattern.compile(globalMappings.getInject(), Pattern.DOTALL).matcher(request.getBodyAsString());
+        matcher.find();
+        retval = matcher.group(Integer.valueOf(globalMappings.getInjectIndex()));
+        System.out.println("p" + retval);
+        if (Optional.ofNullable(globalMappings.getInjectMatch()).isPresent()) {
+            Matcher matcher1 = Pattern.compile(globalMappings.getInjectMatch()).matcher(retval);
+            Matcher matcher2 = Pattern.compile(globalMappings.getMatch()).matcher(body);
+            matcher2.find();
+
+            while (matcher1.find()) {
+                System.out.println("K" + matcher1.group(1) + " " + matcher2.group(Integer.valueOf(globalMappings.getInjectReplaceIndex())));
+                retval = retval.replaceAll(matcher1.group(1),
+                        matcher2.group(Integer.valueOf(globalMappings.getInjectReplaceIndex())));
+                System.out.println("w" + retval);
+            }
+
+        }
+
+        return retval;
+    }
+
+    private String getPathValue(GlobalMappings globalMappings) {
+        return body.startsWith("<") ? JavaScriptHelper.getXMLValue(request, globalMappings.getPath()) :
+                JavaScriptHelper.getJSONValue(request, globalMappings.getPath());
     }
 
 

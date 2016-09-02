@@ -1,6 +1,7 @@
 package com.stubs.cool_extensions.glue;
 
 import com.github.tomakehurst.wiremock.http.Request;
+import org.apache.commons.lang3.RandomStringUtils;
 
 import javax.script.Invocable;
 import javax.script.ScriptEngine;
@@ -59,6 +60,19 @@ public class LogicResolver implements AbstractLogicResolver {
             } else {
                 retval = updateBody(retval, request.queryParameter(value).values().get(0), orig);
             }
+        }
+        return retval;
+    }
+
+
+    @Logic(exp = "random#Numbers\\[(\\d+)\\]#random")
+    public String randomNumbers(String exp) {
+        Matcher match = Pattern.compile(exp).matcher(Body);
+        String retval = Body;
+        while (match.find()) {
+            String orig = match.group();
+            String value = match.group(1);
+            retval = updateBody(retval, RandomStringUtils.randomNumeric(Integer.parseInt(value)), orig);
         }
         return retval;
     }
