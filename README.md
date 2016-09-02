@@ -7,7 +7,7 @@ It obviously written om top of wiremock http://wiremock.org/
 <dependency>
     <groupId>com.github.kumarvikas1</groupId>
     <artifactId>wiremock_cool_extensions</artifactId>
-    <version>1.0.0</version>
+    <version>1.0.0.1</version>
 </dependency>
 ```
 
@@ -17,6 +17,7 @@ It obviously written om top of wiremock http://wiremock.org/
 Response Generator needs to overriden if we want to update Java Code and applies method return boolean to return applicable response generator
 
 ```
+@Component
 public class Test1Generator extends AbstractResponseGenerator {
 
 @Override
@@ -33,17 +34,9 @@ Implement the getResponse method to return the updated Body.
     public ResponseDefinition getResponse() {
 ```
 
-Update the defaults.conf with the name of class extending Abstract Response Generator
-```
-response = [
-  "com.hotels.rtt.generators.Test1Generator",
-  "com.hotels.rtt.generators.Test2Generator",
-  "com.hotels.rtt.generators.Test5Generator"
-]
-```
 ###Update Body in .json files
 
-####Key
+###Key
 ```
 "body": "Country is key#key Country#key And currency is key#key Currency#key",
 ```
@@ -187,6 +180,26 @@ will result in
 ```
 Country is with Currency USD
 ```
+
+###FreeMaker
+```
+{
+  "Currency": ${request.Currency}
+}
+
+```
+Get request 
+```
+test3/?Country=America&Currency=USD
+```
+
+will result in
+```
+{
+  "Currency": GBP
+}
+```
+
 
 ###Create globalMappings.json to simply make a regular expression replaced in the body with the request body value
 
