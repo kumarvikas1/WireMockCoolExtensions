@@ -40,7 +40,7 @@ public class ResponseMaker {
             data.put("request", queryParams);
             StringWriter writer = new StringWriter();
             template.process(data, writer);
-            return response.response().body(writer.toString()).build();
+            return response.response().body(writer.toString()).headers(response.getHeaders()).build();
         } catch (URISyntaxException | IOException | TemplateException e) {
             return Response.notConfigured();
         }

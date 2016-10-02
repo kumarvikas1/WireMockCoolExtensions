@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.tomakehurst.wiremock.common.FileSource;
 import com.github.tomakehurst.wiremock.http.Request;
 import com.github.tomakehurst.wiremock.http.Response;
+import com.google.common.base.Joiner;
 import com.stubs.cool_extensions.glue.JavaScriptHelper;
 import com.stubs.cool_extensions.glue.Logic;
 import com.stubs.cool_extensions.glue.LogicResolver;
@@ -49,35 +50,31 @@ public class FilterBody {
 
 
     private void updateBodyGlobally(GlobalMappings globalMappings) {
+        Matcher matcher = getMatcherBody(globalMappings);
         String value = Optional.ofNullable(globalMappings.getPath()).isPresent() ? getPathValue(globalMappings) : getBodyValue(globalMappings);
-        Matcher matcher = Pattern.compile(globalMappings.getMatch()).matcher(body);
         while (matcher.find()) {
             body = body.replaceAll(matcher.group(), matcher.group().
                     replaceAll(matcher.group(Integer.valueOf(Optional.ofNullable(globalMappings.getReplaceIndex()).orElse("1"))), value));
         }
     }
 
+    private Matcher getMatcherBody(GlobalMappings globalMappings) {
+        return Pattern.compile(globalMappings.getMatch()).matcher(body);
+    }
+
     private String getBodyValue(GlobalMappings globalMappings) {
-        String retval = "";
         Matcher matcher = Pattern.compile(globalMappings.getInject(), Pattern.DOTALL).matcher(request.getBodyAsString());
+        Matcher matcherRes = getMatcherBody(globalMappings);
         matcher.find();
-        retval = matcher.group(Integer.valueOf(globalMappings.getInjectIndex()));
-        System.out.println("p" + retval);
-        if (Optional.ofNullable(globalMappings.getInjectMatch()).isPresent()) {
-            Matcher matcher1 = Pattern.compile(globalMappings.getInjectMatch()).matcher(retval);
-            Matcher matcher2 = Pattern.compile(globalMappings.getMatch()).matcher(body);
-            matcher2.find();
+        matcherRes.find();
+        return Optional.ofNullable(globalMappings.getInjectMatch()).isPresent() ?
+                getInjectedUpdated(globalMappings, matcher.group(Integer.valueOf(globalMappings.getInjectIndex())), matcherRes.group(Integer.valueOf(globalMappings.getInjectReplaceIndex())))
+                : matcher.group(Integer.valueOf(globalMappings.getInjectIndex()));
+    }
 
-            while (matcher1.find()) {
-                System.out.println("K" + matcher1.group(1) + " " + matcher2.group(Integer.valueOf(globalMappings.getInjectReplaceIndex())));
-                retval = retval.replaceAll(matcher1.group(1),
-                        matcher2.group(Integer.valueOf(globalMappings.getInjectReplaceIndex())));
-                System.out.println("w" + retval);
-            }
-
-        }
-
-        return retval;
+    private String getInjectedUpdated(GlobalMappings globalMappings, String retval, String replace) {
+        return retval.replaceAll(globalMappings.getInjectMatch(), Joiner.on("").join(globalMappings.getInjectReplacePrefix(), replace,
+                globalMappings.getInjectReplaceSuffix()));
     }
 
     private String getPathValue(GlobalMappings globalMappings) {
@@ -155,7 +152,9 @@ public class FilterBody {
         } catch (Exception w) {
             w.printStackTrace();
         }
+
     }
+
 
     private Predicate<Method> getMatchingMethod() {
         return method -> {

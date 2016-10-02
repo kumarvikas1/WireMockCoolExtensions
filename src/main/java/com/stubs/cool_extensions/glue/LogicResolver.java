@@ -6,6 +6,8 @@ import org.apache.commons.lang3.RandomStringUtils;
 import javax.script.Invocable;
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -14,6 +16,8 @@ import java.util.regex.Pattern;
  */
 public class LogicResolver implements AbstractLogicResolver {
     final String XML_PATTERN_STR = "<.*>";
+    final Map<String, String> holdValues = new HashMap<>();
+
 
     String Body;
     Request request;
@@ -76,6 +80,7 @@ public class LogicResolver implements AbstractLogicResolver {
         }
         return retval;
     }
+
 
     @Logic(exp = "show#given ([^\"]*) equals ([^\"]*) then show(.*?)#show")
     public String show_only_when(String exp) {

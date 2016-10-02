@@ -28,6 +28,10 @@ public class GlobalMappings {
     private String injectReplaceIndex;
     @JsonProperty("injectMatch")
     private String injectMatch;
+    @JsonProperty("injectReplacePrefix")
+    private String injectReplacePrefix;
+    @JsonProperty("injectReplaceSuffix")
+    private String injectReplaceSuffix;
 
     /**
      * @return The url
@@ -149,5 +153,23 @@ public class GlobalMappings {
         this.injectMatch = injectMatch;
     }
 
+    @JsonProperty("injectReplacePrefix")
+    public String getInjectReplacePrefix() {
+        return injectReplacePrefix;
+    }
 
+    @JsonProperty("injectReplacePrefix")
+    public void setInjectReplacePrefix(String injectReplacePrefix) {
+        this.injectReplacePrefix = injectReplacePrefix;
+    }
+
+    @JsonProperty("njectReplaceSuffix")
+    public String getInjectReplaceSuffix() {
+        return injectReplaceSuffix;
+    }
+
+    @JsonProperty("njectReplaceSuffix")
+    public void setInjectReplaceSuffix(String injectReplaceSuffix) {
+        this.injectReplaceSuffix = injectReplaceSuffix;
+    }
 }
