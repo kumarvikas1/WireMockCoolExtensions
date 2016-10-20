@@ -6,6 +6,8 @@ import org.apache.commons.lang3.RandomStringUtils;
 import javax.script.Invocable;
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -77,6 +79,21 @@ public class LogicResolver implements AbstractLogicResolver {
             String orig = match.group();
             String value = match.group(1);
             retval = updateBody(retval, RandomStringUtils.randomNumeric(Integer.parseInt(value)), orig);
+        }
+        return retval;
+    }
+
+    @Logic(exp = "date#days\\[(\\d+)\\,\"(.*)\"]#date")
+    public String date(String exp) {
+        Matcher match = Pattern.compile(exp).matcher(Body);
+        String retval = Body;
+        while (match.find()) {
+            String orig = match.group();
+            String day = match.group(1);
+            String format = match.group(2);
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern(format);
+            LocalDateTime localDateTime = LocalDateTime.now().plusDays(Integer.valueOf(day));
+            retval = updateBody(retval, localDateTime.toString(), orig);
         }
         return retval;
     }

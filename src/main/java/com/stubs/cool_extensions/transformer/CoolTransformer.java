@@ -26,11 +26,13 @@ public class CoolTransformer extends AbstractTransformer {
 
     @Override
     public Response transform(Request request, Response response, FileSource fileSource, Parameters parameters) {
+        LOGGER.info("Request body {}", request.getBodyAsString());
         String body = response.getBodyAsString();
         response = ResponseMaker.of(response, request).evaluateLogic();
         Response retval = new FilterBody.Builder().FileSource(fileSource).LogicResolver(getLogicResolver(body, request))
                 .Request(request).Response(response).Body(body).build().getFilterBody();
         StubsManager.get().addCache(request, retval.getBodyAsString());
+        LOGGER.info("Response " + retval.getBodyAsString());
         return retval;
     }
 

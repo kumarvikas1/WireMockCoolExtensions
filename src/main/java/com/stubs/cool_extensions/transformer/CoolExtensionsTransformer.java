@@ -35,6 +35,7 @@ public class CoolExtensionsTransformer extends AbstractExtensionsTransformer {
 
     @Override
     public ResponseDefinition transform(Request request, ResponseDefinition responseDefinition, FileSource fileSource, Parameters parameters) {
+        LOGGER.info("Request Body {}", request.getBodyAsString());
         ResponseDefinition retval;
         Optional<AbstractResponseGenerator> responseGenerator = responseGeneratorList.stream().filter(f -> f.applies(request)).findFirst();
         retval = responseGenerator.isPresent() ? ResponseDefinitionBuilder.like(responseDefinition).withBody(responseGenerator.get().getResponse().getBody()).build()
